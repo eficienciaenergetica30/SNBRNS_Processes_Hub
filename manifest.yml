@@ -1,0 +1,11 @@
+applications:
+  - name: snbrns-processes-hub
+    memory: 256M
+    disk_quota: 512M
+    instances: 1
+    random-route: true
+    buildpacks:
+      - python_buildpack
+    env:
+      PYTHONUNBUFFERED: "1"
+      WEB_CONCURRENCY: "2"
