@@ -1,11 +1,14 @@
 import logging
 from typing import Dict
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
-from app.dependencies import get_settings
+from pydantic import BaseModel
+
+from app.dependencies import get_settings, get_hana_client
+from app.db.hana_client import HanaClient, HanaClientError
 from app.routers.hana_sql_queries import router as sql_router
 from app.routers.hana_procedures import router as proc_router
 
@@ -32,18 +35,15 @@ def create_app() -> FastAPI:
 
     # Routers (prefijo global)
     app.include_router(sql_router, prefix="/snbrns-hub")
-    from app.routers.hana_sql_queries import router_alias as sql_router_alias
-    app.include_router(sql_router_alias, prefix="/snbrns-hub")
     app.include_router(proc_router, prefix="/snbrns-hub")
 
-    @app.get("/health")
+    @app.get("/health", tags=["Core"])
     def health() -> Dict[str, str]:
         return {"status": "ok", "environment": settings.environment}
 
-    # Alias bajo el prefijo global
-    @app.get("/snbrns-hub/health")
-    def health_prefixed() -> Dict[str, str]:
-        return {"status": "ok", "environment": settings.environment}
+    # (eliminado alias de health con prefijo)
+
+    
 
     # Home en ruta raíz
     @app.get("/", tags=["General"], summary="Root")
@@ -56,9 +56,9 @@ def create_app() -> FastAPI:
                 "General": {"root": "/"},
                 "HANA DB - SQL": {
                     "ee_site": {
-                        "path": "/snbrns-hub/ee-site",
+                        "path": "/snbrns-hub/hana/sql/ee-site",
                         "description": "Lista filas de GLOBALHITSS_EE_SITE",
-                        "sample": "/snbrns-hub/ee-site?limit=10",
+                        "sample": "/snbrns-hub/hana/sql/ee-site?limit=10",
                     }
                 },
                 "HANA Stored Procedures": {

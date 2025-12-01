@@ -85,3 +85,137 @@ class HanaClient:
                     cursor.close()
                 except Exception:
                     pass
+
+    def call_procedure_qualified(self, qualified_name: str, params: Optional[Iterable[Any]] = None) -> List[Dict[str, Any]]:
+        placeholders = ""
+        if params:
+            placeholders = ",".join(["?"] * len(list(params)))
+        call_sql = f"CALL {qualified_name}({placeholders})"
+        with self._connection() as conn:
+            cursor = conn.cursor()
+            try:
+                if params:
+                    cursor.execute(call_sql, list(params))
+                else:
+                    cursor.execute(call_sql)
+                if cursor.description:
+                    columns = [d[0] for d in cursor.description]
+                    rows = cursor.fetchall()
+                    return [{columns[i]: row[i] for i in range(len(columns))} for row in rows]
+                return []
+            except Exception as exc:
+                raise HanaClientError(str(exc)) from exc
+            finally:
+                try:
+                    cursor.close()
+                except Exception:
+                    pass
+
+    def call_procedure_multi(self, procedure_name: str, params: Optional[Iterable[Any]] = None) -> List[List[Dict[str, Any]]]:
+        schema_prefix = f'"{self.settings.hana_schema}".' if self.settings.hana_schema else ""
+        placeholders = ""
+        if params:
+            placeholders = ",".join(["?"] * len(list(params)))
+        call_sql = f"CALL {schema_prefix}\"{procedure_name}\"({placeholders})"
+        with self._connection() as conn:
+            cursor = conn.cursor()
+            try:
+                if params:
+                    cursor.execute(call_sql, list(params))
+                else:
+                    cursor.execute(call_sql)
+                result_sets: List[List[Dict[str, Any]]] = []
+                while True:
+                    if cursor.description:
+                        columns = [d[0] for d in cursor.description]
+                        rows = cursor.fetchall()
+                        result_sets.append([{columns[i]: row[i] for i in range(len(columns))} for row in rows])
+                    else:
+                        pass
+                    if not getattr(cursor, "nextset", None) or not cursor.nextset():
+                        break
+                return result_sets
+            except Exception as exc:
+                raise HanaClientError(str(exc)) from exc
+            finally:
+                try:
+                    cursor.close()
+                except Exception:
+                    pass
+
+    def call_procedure_multi_qualified(self, qualified_name: str, params: Optional[Iterable[Any]] = None) -> List[List[Dict[str, Any]]]:
+        placeholders = ""
+        if params:
+            placeholders = ",".join(["?"] * len(list(params)))
+        call_sql = f"CALL {qualified_name}({placeholders})"
+        with self._connection() as conn:
+            cursor = conn.cursor()
+            try:
+                if params:
+                    cursor.execute(call_sql, list(params))
+                else:
+                    cursor.execute(call_sql)
+                result_sets: List[List[Dict[str, Any]]] = []
+                while True:
+                    if cursor.description:
+                        columns = [d[0] for d in cursor.description]
+                        rows = cursor.fetchall()
+                        result_sets.append([{columns[i]: row[i] for i in range(len(columns))} for row in rows])
+                    else:
+                        pass
+                    if not getattr(cursor, "nextset", None) or not cursor.nextset():
+                        break
+                return result_sets
+            except Exception as exc:
+                raise HanaClientError(str(exc)) from exc
+            finally:
+                try:
+                    cursor.close()
+                except Exception:
+                    pass
+
+    def call_procedure_with_outputs(self, procedure_name: str, params: Optional[Iterable[Any]] = None) -> Dict[str, Any]:
+        schema_prefix = f'"{self.settings.hana_schema}".' if self.settings.hana_schema else ""
+        proc = f"{schema_prefix}\"{procedure_name}\""
+        with self._connection() as conn:
+            cursor = conn.cursor()
+            try:
+                out_params = cursor.callproc(proc, list(params) if params else [])
+                result_sets: List[List[Dict[str, Any]]] = []
+                while True:
+                    if cursor.description:
+                        columns = [d[0] for d in cursor.description]
+                        rows = cursor.fetchall()
+                        result_sets.append([{columns[i]: row[i] for i in range(len(columns))} for row in rows])
+                    if not getattr(cursor, "nextset", None) or not cursor.nextset():
+                        break
+                return {"output_params": out_params, "result_sets": result_sets}
+            except Exception as exc:
+                raise HanaClientError(str(exc)) from exc
+            finally:
+                try:
+                    cursor.close()
+                except Exception:
+                    pass
+
+    def call_procedure_with_outputs_qualified(self, qualified_name: str, params: Optional[Iterable[Any]] = None) -> Dict[str, Any]:
+        with self._connection() as conn:
+            cursor = conn.cursor()
+            try:
+                out_params = cursor.callproc(qualified_name, list(params) if params else [])
+                result_sets: List[List[Dict[str, Any]]] = []
+                while True:
+                    if cursor.description:
+                        columns = [d[0] for d in cursor.description]
+                        rows = cursor.fetchall()
+                        result_sets.append([{columns[i]: row[i] for i in range(len(columns))} for row in rows])
+                    if not getattr(cursor, "nextset", None) or not cursor.nextset():
+                        break
+                return {"output_params": out_params, "result_sets": result_sets}
+            except Exception as exc:
+                raise HanaClientError(str(exc)) from exc
+            finally:
+                try:
+                    cursor.close()
+                except Exception:
+                    pass
