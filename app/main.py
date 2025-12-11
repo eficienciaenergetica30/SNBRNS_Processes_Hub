@@ -62,10 +62,10 @@ def create_app() -> FastAPI:
                     }
                 },
                 "HANA Stored Procedures": {
-                    "snbrns01": {
-                        "path": "/snbrns-hub/hana/procedures/snbrns01",
-                        "description": "Ejecuta SNBRNS01 (param1, param2)",
-                        "sample": "/snbrns-hub/hana/procedures/snbrns01",
+                    "SP_SNBRS_19": {
+                        "path": "/snbrns-hub/hana/procedures/sp-snbrs-19",
+                        "description": "Ejecuta SP_SNBRS_19 (param1, param2)",
+                        "sample": "/snbrns-hub/hana/procedures/sp-snbrs-19",
                     }
                 },
             },

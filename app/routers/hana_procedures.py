@@ -46,14 +46,14 @@ def call_snbrns_test(input_data: SNBRNSTestInput, client: HanaClient = Depends(g
         raise HTTPException(status_code=500, detail=f"HANA error: {exc}")
 
 
-# Modelo de entrada para SNBRNS01
-class SNBRNS01Input(BaseModel):
+# Modelo de entrada para SP_SNBRS_19
+class SNBRNS19Input(BaseModel):
     param1: int
     param2: str
-@router.post("/snbrns01")
-def call_snbrns01(input_data: SNBRNS01Input, client: HanaClient = Depends(get_hana_client)):
+@router.post("/sp-snbrs-19")
+def call_sp_snbrs_19(input_data: SNBRNS19Input, client: HanaClient = Depends(get_hana_client)):
     try:
-        result = client.call_procedure_with_outputs("SNBRNS01", [input_data.param1, input_data.param2])
+        result = client.call_procedure_with_outputs("SP_SNBRS_19", [input_data.param1, input_data.param2])
         output_params = result.get("output_params")
         result_sets = result.get("result_sets", [])
         response = {
