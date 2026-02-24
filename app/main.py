@@ -75,7 +75,12 @@ def create_app() -> FastAPI:
                     "SP_SNBRS_03": {
                         "path": "/snbrns-hub/hana/procedures/sp-snbrs-03",
                         "description": "Ejecuta SP_SNBRS_03 (param1, param2)",
-                        "sample": "/snbrns-hub/hana/procedures/sp-snbrs-02",
+                        "sample": "/snbrns-hub/hana/procedures/sp-snbrs-03",
+                    },
+                    "SP_SNBRS_12": {
+                        "path": "/snbrns-hub/hana/procedures/sp-snbrs-12",
+                        "description": "Ejecuta SP_SNBRS_12 (param1, param2)",
+                        "sample": "/snbrns-hub/hana/procedures/sp-snbrs-12",
                     },
                     "SP_SNBRS_19": {
                         "path": "/snbrns-hub/hana/procedures/sp-snbrs-19",
