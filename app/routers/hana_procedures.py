@@ -64,6 +64,7 @@ def call_sp_snbrs_01(input_data: SNBRNS01Input, client: HanaClient = Depends(get
                 input_data.execution_id_in,
                 input_data.user,
             ],
+            out_params_count=4,
         )
         output_params = result.get("output_params")
         result_sets = result.get("result_sets", [])
