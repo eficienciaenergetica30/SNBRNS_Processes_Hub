@@ -100,7 +100,6 @@ def call_sp_snbrs_01(input_data: SNBRNS01Input, client: HanaClient = Depends(get
     except HanaClientError as exc:
         raise HTTPException(status_code=500, detail=f"HANA error: {exc}")
 
-
 # Modelo de entrada para SP_SNBRS_02
 class SNBRNS02Input(BaseModel):
     rows_read: int
@@ -158,18 +157,31 @@ def call_sp_snbrs_02(input_data: SNBRNS02Input, client: HanaClient = Depends(get
 
 # Modelo de entrada para SP_SNBRS_03
 class SNBRNS03Input(BaseModel):
-    param1: int
-    param2: str
+    rows_read: int
+    rows_inserted_init: int
+    execution_id_in: str
+    user: str
 @router.post("/sp-snbrs-03")
 def call_sp_snbrs_03(input_data: SNBRNS03Input, client: HanaClient = Depends(get_hana_client)):
     try:
-        result = client.call_procedure_with_outputs("SP_SNBRS_03", [input_data.param1, input_data.param2])
+        result = client.call_procedure_with_outputs(
+            "SP_SNBRS_03",
+            [
+                input_data.rows_read,
+                input_data.rows_inserted_init,
+                input_data.execution_id_in,
+                input_data.user,
+            ],
+            out_params_count=4,
+        )
         output_params = result.get("output_params")
         result_sets = result.get("result_sets", [])
         response = {
             "success": False,
             "success_flag": None,
             "message": None,
+            "execution_id_out": None,
+            "rows_processed": None,
             "output_params": output_params,
             "result_sets_count": len(result_sets),
         }
@@ -184,11 +196,13 @@ def call_sp_snbrs_03(input_data: SNBRNS03Input, client: HanaClient = Depends(get
                     "rows": first_set,
                     "count": len(first_set),
                 })
-        if output_params and isinstance(output_params, (list, tuple)) and len(output_params) >= 2:
+        if output_params and isinstance(output_params, (list, tuple)) and len(output_params) >= 4:
             response.update({
                 "success": True,
                 "success_flag": output_params[0],
                 "message": output_params[1],
+                "execution_id_out": output_params[2],
+                "rows_processed": output_params[3],
             })
         return response
     except HanaClientError as exc:
